@@ -24,8 +24,6 @@ namespace BadgerServer
 						TriggerClientEvent(targetPlayer, "BadgerCopyOutfit:GetOutfit", source);
 					}
 				}
-				else
-					Debug.WriteLine("BadgerCopyOutfit: No command args");
 			}), false);
 		}
 
