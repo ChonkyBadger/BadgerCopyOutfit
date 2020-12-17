@@ -10,7 +10,7 @@ namespace BadgerServer
         public BadgerServer()
 		{
 			// Get outfit from client
-			EventHandlers["BadgerCopyOutfit:SendOutfitToServer"] += new Action<IList<dynamic>, int>(SendOutfit);
+			EventHandlers["BadgerCopyOutfit:SendOutfitToServer"] += new Action<IList<dynamic>, IList<dynamic>, int>(SendOutfit);
 
 			RegisterCommand("copyOutfit", new Action<int, List<object>, string>((source, args, raw) =>
 			{
@@ -28,9 +28,9 @@ namespace BadgerServer
 		}
 
 		// Send outfit to client
-		private void SendOutfit(IList<dynamic> outfit, int targetPlayer)
+		private void SendOutfit(IList<dynamic> clothes, IList<dynamic> props, int targetPlayer)
 		{
-			TriggerClientEvent(Players[targetPlayer], "BadgerCopyOutfit:SetOutfit", outfit);
+			TriggerClientEvent(Players[targetPlayer], "BadgerCopyOutfit:SetOutfit", clothes, props);
 		}
     }
 

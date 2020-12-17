@@ -11,7 +11,7 @@ namespace BadgerClient
         public BadgerClient()
 		{
             EventHandlers["BadgerCopyOutfit:GetOutfit"] += new Action<int>(GetOutfit);
-            EventHandlers["BadgerCopyOutfit:SetOutfit"] += new Action<IList<dynamic>>(SetOutfit);
+            EventHandlers["BadgerCopyOutfit:SetOutfit"] += new Action<IList<dynamic>, IList<dynamic>>(SetOutfit);
 
             TriggerEvent("chat:addSuggestion", "/copyoutfit", "Copies the outfit of another player", new[]
             {
@@ -23,29 +23,54 @@ namespace BadgerClient
         private void GetOutfit(int playerToGiveOutfit)
 		{
             int ped = PlayerPedId();
-            IList<dynamic> outfit = new List<dynamic>();
+            IList<dynamic> clothes = new List<dynamic>();
+            IList<dynamic> props = new List<dynamic>();
 
-            // Get outfit components
+            // Get outfit clothes
             for (int i = 1; i <= 11; i++)
             {
-                int component = GetPedDrawableVariation(ped, i);
-                outfit.Add(component);
+                var pedClothes = new
+                {
+                    Drawable = GetPedDrawableVariation(ped, i),
+                    Texture = GetPedTextureVariation(ped, i),
+                    Palette = GetPedPaletteVariation(ped, i)
+                };
+
+                clothes.Add(pedClothes);
+            }
+
+            // Get outfit props
+            for (int i = 0; i <= 7; i++)
+            {
+                var pedProps = new
+                {
+                    Index = GetPedPropIndex(ped, i),
+                    Texture = GetPedPropTextureIndex(ped, i),
+                };
+
+                props.Add(pedProps);
             }
 
             // Send outfit back to server
-            TriggerServerEvent("BadgerCopyOutfit:SendOutfitToServer", outfit, playerToGiveOutfit);
+            TriggerServerEvent("BadgerCopyOutfit:SendOutfitToServer", clothes, props, playerToGiveOutfit);
         }
 
         // Set outfit
-        private void SetOutfit(IList<dynamic> outfit)
-		{
+        private void SetOutfit(IList<dynamic> clothes, IList<dynamic> props)
+        {
             int ped = PlayerPedId();
 
+            // Set Clothes
             for (int i = 1; i <= 11; i++)
-			{
-                SetPedComponentVariation(ped, i, outfit[i-1], 1, 0);
-			}
+            {
+                SetPedComponentVariation(ped, i, clothes[i - 1].Drawable, clothes[i - 1].Texture, clothes[i - 1].Palette);
+            }
 
+            // Set Props
+            for (int i = 1; i <= 7; i++)
+            {
+                SetPedPropIndex(ped, i, props[i].Index, props[i].Texture, false); // Hat
+            }
             Screen.ShowNotification("~y~[BadgerCopyOutfit]\n~w~Outfit successfully copied");
 		}
     }
